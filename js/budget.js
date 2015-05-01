@@ -15,8 +15,9 @@ $.getScript( "https://www.google.com/jsapi", function( data, textStatus, jqxhr )
 });
 */
 google.load("visualization", "1", {packages:["table"]});
-
-
+function init() {
+	$( "#eDatepicker" ).datepicker();
+}
 /*
 * setup table view
 */
@@ -35,46 +36,25 @@ function initBudgetTable() {
 	
 	return tableData;
 }
-
+	
 /*
 * Save budget entry to user local storage 
 */
-function addNewEntry_local() {
+function addEntry() {
 	
 }
 
 /*
 * delete budget entry from user local storage 
 */
-function removeEntry_local() {
+function removeEntry() {
 	
 }
 
 /*
 * edit a single entry of budget on the user local storage  
 */
-function modifyEntry_local() {
-	
-}
-
-/*
-* Save budget entry to server database (login required)
-*/
-function addNewEntry_server() {
-
-}
-
-/*
-* delete budget entry from server database (login required)
-*/
-function removeEntry_server() {
-	
-}
-
-/*
-* edit a single entry of budget on the server database (login required)
-*/
-function modifyEntry_server() {
+function modifyEntry() {
 	
 }
 
@@ -88,22 +68,20 @@ function viewEntry() {
 	
 	$(document).ready(function () {
 		budgetTable = new google.visualization.Table(document.getElementById('BudgetTable_div'));
-	tableData = initBudgetTable();
-	getBudgetEntries_local(tableData);
-	budgetTable.draw(tableData, {showRowNumber: true});
+		tableData = initBudgetTable();
+		getBudgetEntries(tableData);
+		budgetTable.draw(tableData, {showRowNumber: true});
 	});
 }
 
-function getBudgetEntries_local() {
-	
-}
-
-function getBudgetEntries_server() {
+function getBudgetEntries(tableData) {
 	tableData.addRows([
-			['Decor', 'Decoration vender deal', '2015-03-03', 
-			{v: 1500, f: '$1500'}, {v: 2000, f: '$2000'}, false]
+		['Decor', 'Decoration vender deal', '2015-03-03', 
+		{v: 1500, f: '$1500'}, {v: 2000, f: '$2000'}, false]
 	]);
 }
+
+
 
 function formatBudgetEntriesForView() {
 	

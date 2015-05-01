@@ -3,7 +3,7 @@
 <head>
 	<title>My Wedding Planner</title>	
 </head>
-<body>
+<body onload="init()">
 	<h1>My Wedding Planner</h1>
 
 	<div id="main_menu">
@@ -16,10 +16,69 @@
 	<div id="budget_view">
 		<h2> this is budget view </h2>
 		<div id="BudgetTable_div"></div>
+		
+		<button id="but_add_entry" type="button" onclick="addEntry()"> Create New Budget Entry </button>
+	</div>
+	<div id="add_entry_view" class="Table">
+		<div class="Title">
+			<h2>Add New Entry</h2>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<p> Name: </p>
+			</div>
+			<div class="Cell">
+				<p> <input type="text" id="eName"> </p>
+			</div>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<p> Description: </p>
+			</div>
+			<div class="Cell">
+				<p> <textarea id="eDescrip" rows="4" cols="50"></textarea> </p>
+			</div>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<p> Date:  </p>
+			</div>
+			<div class="Cell">
+				<p> <input type="text" id="eDatepicker"> </p>
+			</div>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<p> Planned Amount($): </p>
+			</div>
+			<div class="Cell">
+				<p> <input type="text" id="ePlanAmount"> </p>
+			</div>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<p> Actual Amount($):</p>
+			</div>
+			<div class="Cell">
+				<p> <input type="text" id="eAcutAmount"> </p>
+			</div>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<p> Already Paid </p>
+			</div>
+			<div class="Cell">
+				<p> <input type="checkbox" id="ePaid"> </p>
+			</div>
+		</div>
 	</div>
 	
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
+	
+	<link rel="stylesheet" href="css/budget.css">
 	<script src="js/menu.js"></script>
 	<script src="js/budget.js"></script>
 </body>
