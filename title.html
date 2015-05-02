@@ -17,7 +17,7 @@
 		<h2> this is budget view </h2>
 		<div id="BudgetTable_div"></div>
 		
-		<button id="but_add_entry" type="button" onclick="addEntry()"> Create New Budget Entry </button>
+		<button id="but_add_entry" type="button" onclick="showEntryEditor()"> Create New Budget Entry </button>
 	</div>
 	<div id="add_entry_view" class="Table">
 		<div class="Title">
@@ -41,7 +41,7 @@
 		</div>
 		<div class="Row">
 			<div class="Cell">
-				<p> Date:  </p>
+				<p> Last Modified Date:  </p>
 			</div>
 			<div class="Cell">
 				<p> <input type="text" id="eDatepicker"> </p>
@@ -60,7 +60,7 @@
 				<p> Actual Amount($):</p>
 			</div>
 			<div class="Cell">
-				<p> <input type="text" id="eAcutAmount"> </p>
+				<p> <input type="text" id="eActuAmount"> </p>
 			</div>
 		</div>
 		<div class="Row">
@@ -69,6 +69,12 @@
 			</div>
 			<div class="Cell">
 				<p> <input type="checkbox" id="ePaid"> </p>
+			</div>
+		</div>
+		<div class="Row">
+			<div class="Cell">
+				<button id="but_add_entry" type="button" onclick="addEntry()"> Add </button>
+				<button id="but_cancel_add_entry" type="button" > Cancel </button>
 			</div>
 		</div>
 	</div>

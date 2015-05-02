@@ -1,19 +1,4 @@
-
-/*
-// load jquery 
-var script = document.createElement('script');
-script.src = 'http://code.jquery.com/jquery-1.11.0.min.js';
-script.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(script);
-
 // load google chart library
-$.getScript( "https://www.google.com/jsapi", function( data, textStatus, jqxhr ) {
-  console.log( data ); // Data returned
-  console.log( textStatus ); // Success
-  console.log( jqxhr.status ); // 200
-  console.log( "Load was performed." );
-});
-*/
 google.load("visualization", "1", {packages:["table"]});
 function init() {
 	$( "#eDatepicker" ).datepicker();
@@ -25,11 +10,9 @@ function initBudgetTable() {
 	var tableData = new google.visualization.DataTable();
 	var entries;
 	
-
-	
 	tableData.addColumn('string', 'Entry Name');
 	tableData.addColumn('string','Detail Description');
-	tableData.addColumn('string','Date');
+	tableData.addColumn('string','Last Modified Date');
 	tableData.addColumn('number','Planned Amount($)');
 	tableData.addColumn('number','Actual Amount($)');
 	tableData.addColumn('boolean','Paid In Full');
@@ -41,7 +24,41 @@ function initBudgetTable() {
 * Save budget entry to user local storage 
 */
 function addEntry() {
+	var eName = document.getElementById('eName').value;
+	var eDesc = document.getElementById('eDescrip').value;
+	var eDate = document.getElementById('eDatepicker').value;
+	var ePlanAmount = parseFloat(document.getElementById('ePlanAmount').value);
+	var eActuAmount = parseFloat(document.getElementById('eActuAmount').value);
+	var ePaid = document.getElementById('ePaid').checked;
 	
+	
+	var entryData = {
+		"entryName": eName,
+		"entryDesc": eDesc,
+		"entryDate": eDate,
+		"entryPlanAmount": ePlanAmount,
+		"entryActualAmount": eActuAmount,
+		"entryIsPaid": ePaid
+	};
+	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetConnection.php";
+	$.ajax({
+		url: reqUrl,
+		type: "POST",
+		data: {addBudgetEntryAjax:true, details:entryData},
+		datatype: "json",
+		success: function (result) {
+			console.log(JSON.parse(result));
+		}
+	});
+
+/*	
+	$.post(url, 
+		entryData, 
+		function(result, status){
+			console.log("R: " + result + "\nS: " + status);
+		}
+	);
+*/
 }
 
 /*
