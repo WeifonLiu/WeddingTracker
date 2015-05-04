@@ -17,11 +17,11 @@
 		<h2> this is budget view </h2>
 		<div id="BudgetTable_div"></div>
 		
-		<button id="but_add_entry" type="button" onclick="showEntryEditor()"> Create New Budget Entry </button>
+		<button id="but_add_entry" type="button" onclick="showEntryEditor('addition')"> Create New Budget Entry </button>
 	</div>
 	<div id="add_entry_view" class="Table">
 		<div class="Title">
-			<h2>Add New Entry</h2>
+			<h2 id="editorHeader2"></h2>
 			<input type="hidden" id="eID">
 		</div>
 		<div class="Row">
@@ -45,7 +45,7 @@
 				<p> Last Modified Date:  </p>
 			</div>
 			<div class="Cell">
-				<p> <input type="text" id="eDatepicker"> </p>
+				<p> <input type="text" id="eDate"> </p>
 			</div>
 		</div> 
 		<div class="Row">
