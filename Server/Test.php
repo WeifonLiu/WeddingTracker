@@ -18,8 +18,31 @@ $BudgetCon = new BudgetConnection;
 
 <?php 
 
-	echo var_dump($BudgetCon -> getAllBudgetEntry("test@test.user"));
-	
+	echo var_dump($BudgetCon -> editBudgetEntry(
+									0,
+									27,
+									'more testing',
+									'blah',
+									350,
+									341,
+									false));
+									
+									/*
+									
+									["aid"]=>
+  string(1) "0"
+  ["entryid"]=>
+  string(2) "27"
+  ["entryName"]=>
+  string(12) "more testing"
+  ["entryDesc"]=>
+  string(3) "312"
+  ["entryPlanAmount"]=>
+  string(3) "350"
+  ["entryActualAmount"]=>
+  string(3) "331"
+  ["entryIsPaid"]=>
+  string(5) "false"
 ?>
 
 
