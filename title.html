@@ -17,9 +17,9 @@
 		<h2> this is budget view </h2>
 		<div id="BudgetTable_div"></div>
 		
-		<button id="but_add_entry" type="button" onclick="showEntryEditor('addition')"> Create New Budget Entry </button>
+		<button id="but_show_editor" type="button" onclick="showBudgetEntryEditor('addition')"> Create New Budget Entry </button>
 	</div>
-	<div id="add_entry_view" class="Table">
+	<div id="budget_entry_editor" class="Table" style="display:none">
 		<div class="Title">
 			<h2 id="editorHeader2"></h2>
 			<input type="hidden" id="eID">
@@ -76,7 +76,7 @@
 			<div class="Cell">
 				<button id="but_add_entry" type="button" onclick="addEntry()"> Add </button>
 				<button id="but_edit_entry" type="button" onclick="modifyEntry()"> Edit </button>
-				<button id="but_cancel_add_entry" type="button" > Cancel </button>
+				<button id="but_cancel_add_entry" type="button" onclick="hideBudgetEntryEditor()"> Cancel </button>
 			</div>
 		</div>
 	</div>
