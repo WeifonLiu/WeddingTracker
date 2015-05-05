@@ -6,11 +6,11 @@
 <body>
 	<h1>My Wedding Planner</h1>
 
-	<div id="main_menu">
+	<div id="main_menu" style="display:none">	<!-- hidden because, not meaningful yet -->
 		<button id="but_itinerary" type="button" onclick="hideMenu()">Itinerary</button>
-		<button id="but_budget" type="button" onclick="viewEntry()">Budget</button>
+		<button id="but_budget" type="button" onclick="showBudgetTable()">Budget</button>
 	</div>
-	<div id="itinerary_view">
+	<div id="itinerary_view" style="display:none"> <!-- hidden because, not implemented -->
 		<h2> this is itinerary view </h2>
 	</div>
 	<div id="budget_view">
@@ -76,7 +76,8 @@
 			<div class="Cell">
 				<button id="but_add_entry" type="button" onclick="addEntry()"> Add </button>
 				<button id="but_edit_entry" type="button" onclick="modifyEntry()"> Edit </button>
-				<button id="but_cancel_add_entry" type="button" onclick="hideBudgetEntryEditor()"> Cancel </button>
+				<button id="but_hide_editor" type="button" onclick="hideBudgetEntryEditor()"> Cancel </button>
+				<button id="but_del_entry" type="button" onclick="removeEntry()"> Delete Entry </button>
 			</div>
 		</div>
 	</div>

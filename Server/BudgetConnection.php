@@ -16,9 +16,15 @@ class BudgetConnection
 	*	@param $userid
 	*/
 	function getAllBudgetEntry($userid) {
-		$retList = Array(); 		// return with a list of entries
+		//query variables
 		$db = $this->db;	// set $db in this function as refering to class private $db;
+		$sql = "";			// SQL query 
+		$qRes = null;		// query result
 		
+		// return variable 
+		$retList = Array(); 		// return with a list of entries
+
+		// check DB connectivity
 		if($db == null) { 
 			// if no database connection, connect to it;
 			$db = ConnectDB();	
@@ -50,9 +56,18 @@ class BudgetConnection
 	
 	function addBudgetEntry($aid, $name, $desc, $plan_amount, 
 							$actual_amount, $is_paid) {
-		
-		$db = $this->db;		// set $db in this function as refering to class private $db;
+		// other input variable for this function 												
 		$date = date("Ymd");	// record current system time 
+		
+		//query variables
+		$db = $this->db;		// set $db in this function as refering to class private $db;
+		$sql_verify = "";		// SQL query for verifing pre-existance of entry
+		$sql_insert = "";		// SQL query to insert new entry 
+		$qRet_verify = null;	// query result (for verification)
+		$qRet_insert = null;	// query result (after insert)
+		$isExist = null;		// fetched result of returned query call (verification)
+
+		// return variables 
 		$retMsg = ""; 			// return message
 		$retStatus = 0;			// return status (0 = no change; negative = error; positive = inserted ID)
 		$retPack = Array();		// return package with message, status, and date
@@ -65,13 +80,13 @@ class BudgetConnection
 		// cast is_paid ("true"/"false" in string) to tinyint
 		$is_paid = $is_paid === 'true'? 1: 0;
 		
-		$sql = "SELECT userid, name from budget". " " .
+		$sql_verify = "SELECT userid, name from budget". " " .
 				"WHERE name='" .$name. "' ".
 				"AND userid='" .$aid. "'";
-		$qRet = mysqli_query($db,$sql);
-		$ret = mysqli_fetch_array($qRet);
+		$qRet_verify = mysqli_query($db,$sql_verify);
+		$isExist = mysqli_fetch_array($qRet_verify);
 		
-		if($ret == null) {
+		if($isExist == null) {
 			// begin transaction
 			mysqli_autocommit($db,FALSE);
 			
@@ -116,13 +131,25 @@ class BudgetConnection
 
 	function editBudgetEntry($aid, $entryId, $name, $desc, $plan_amount, 
 							$actual_amount, $is_paid) {
-		$db = $this->db;		// set $db in this function as refering to class private $db;
+		// other input variable for this function 												
 		$date = date("Ymd");	// record current system time 
+		
+		//query variables
+		$db = $this->db;		// set $db in this function as refering to class private $db;
+		$sql_verify = "";		// SQL query for verifing pre-existance of entry
+		$sql_update = "";		// SQL query to update existing entry 
+		$qRet_verify = null;	// query result (for verification)
+		$qRet_update = null;	// query result (update)
+		$isExist = null;		// fetched result of returned query call (verification)
+		$affectRows = 0;		// affected rows after commiting an update query 
+		
+		// return variables 
 		$retMsg = ""; 			// return message
 		$retStatus = 0;			// return status (0 = no change; negative = error; positive = inserted ID)
 		$retPack = Array();		// return package with message, status, and date
 		
-		// if no database connection, connect to it;
+
+		// check DB connectivity
 		if($db == null) { 
 			$db = ConnectDB();			
 		}
@@ -130,13 +157,13 @@ class BudgetConnection
 		// cast is_paid ("true"/"false" in string) to tinyint
 		$is_paid = $is_paid === 'true'? 1: 0;
 		
-		$sql = "SELECT name from budget". " " .
+		$sql_verify = "SELECT name from budget". " " .
 				"WHERE bid='" .$entryId. "' ".
 				"AND userid='" .$aid. "'";
-		$qRet = mysqli_query($db,$sql);
-		$ret = mysqli_fetch_array($qRet);
+		$qRet_verify = mysqli_query($db,$sql_verify);
+		$isExist = mysqli_fetch_array($qRet_verify);
 		
-		if($ret == null) {
+		if($isExist == null) {
 			// not in DB
 			$retMsg = "FAILED: entry with this particular name cannot be found";
 			$retStatus = -1;
@@ -186,11 +213,35 @@ class BudgetConnection
 	}
 	
 	function delBudgetEntry($id) {
+		//query variables
 		$db = $this->db;	// set $db in this function as refering to class private $db;
+		$sql_del = "";		// SQL query 
+		$qRet_del = null;	// query result
+		$affectRows = 0;	// affected rows after commit of query
+		
+		// return variables 
+		$retMsg = ""; 		// return message
+		$retStatus = 0;		// return status (0 = no change; negative = error; positive = inserted ID)
+		$retPack = Array();	
+		
+		
 		// if no database connection, connect to it;
 		if($db == null) { 
 			$db = ConnectDB();	
 		}
+
+		
+		// if no database connection, connect to it;
+		if($db == null) { 
+			$db = ConnectDB();			
+		}
+		// begin transaction
+		mysqli_autocommit($db,FALSE);
+		
+		$sql_del = "DELETE FROM `budget` WHERE `bid`=" . $id;
+		$qRet_del = mysqli_query($db,$sql_del);
+		$affectRows = mysqli_affected_rows($db);
+		
 	}
 	
 }
