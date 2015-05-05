@@ -11,7 +11,7 @@ google.setOnLoadCallback(initBudgetTable);
 
 
 function init() {
-	$( "#eDatepicker" ).datepicker();
+	$( "#eDate" ).datepicker();
 }
 /*
 * setup table view
@@ -21,33 +21,117 @@ function initBudgetTable() {
 	gBudgetTable = new google.visualization.Table(document.getElementById('BudgetTable_div'));
 	
 	// load budget table
-	reloadBudgetTable();
+	loadBudgetTable();
 
 }
 
 /*
-* load budget table again from the current server data
+* load budget table from the current server data
 * if out of sync (ever), discard client data 
 */
-function reloadBudgetTable() {
+function loadBudgetTable() {
 	// new 
 	gTableData = new google.visualization.DataTable();
+	gTableView = new google.visualization.DataView(gTableData);
 	
 	// initialize budget table with current server data
 	setBudgetTableHeader();
 	getBudgetEntries();
+	
 }
 	
 function setBudgetTableHeader() {
 	// add columns to budget table
-	gTableData.addColumn('number', 'Entry ID');
-	gTableData.addColumn('string', 'Entry Name');
-	gTableData.addColumn('string','Detail Description');
-	gTableData.addColumn('string','Last Modified Date');
-	gTableData.addColumn('number','Planned Amount($)');
-	gTableData.addColumn('number','Actual Amount($)');
-	gTableData.addColumn('boolean','Paid In Full');
+	gTableData.addColumn('number', 	'Entry ID', 			'ID');
+	gTableData.addColumn('string', 	'Entry Name', 			'Name');
+	gTableData.addColumn('string',	'Detail Description', 	'Descrip');
+	gTableData.addColumn('string',	'Last Modified Date', 	'Date');
+	gTableData.addColumn('number',	'Planned Amount($)', 	'PlanAmount');
+	gTableData.addColumn('number',	'Actual Amount($)', 	'ActuAmount');
+	gTableData.addColumn('boolean',	'Paid In Full', 		'Paid');
 }	
+
+function drawViewable(){
+	// display (1)name, (2)desc, (3)mod_date, (4)planned amount, (5)actual amount, and (6)paid
+	gTableView.setColumns([1,2,3,4,5,6]); //here you set the columns you want to display
+	
+	// draw
+	gBudgetTable.draw(gTableView, {showRowNumber: true});
+	
+	// add event listener to the drawn table 
+	google.visualization.events.addListener(gBudgetTable, 'select', selectionHandler);
+}
+
+function selectionHandler() {
+	var FIRST_SELECTION = 0;// always get the first of all selections for edit
+	var selections;			// an array of selected rows or cells 
+	var selected;			// the current item in the array
+	var curHeader, curVal;	// the current header ID and value of the selected cell
+	
+	selections = gBudgetTable.getSelection();	
+	
+	if (selections.length == 0) {
+		// when a de-selection is triggered
+		hideBudgetEntryEditor();
+	} else {
+		// when something is selected 
+		selected = selections[FIRST_SELECTION];
+		if (selected.row != null) {
+			for(var iterCol=0; iterCol < gTableData.getNumberOfColumns(); iterCol++) {
+				// get the header id and cell value of given row and column 
+				curHeader = gTableData.getColumnId(iterCol);
+				curVal = gTableData.getValue(selected.row, iterCol);
+				
+				// update the editor fields 
+				if (curHeader == "Paid") {
+					document.getElementById("e"+ curHeader).checked = curVal;
+				} else if (curHeader != "Date") {
+					// skip "Date" value, as it is not editable for user
+					document.getElementById("e"+ curHeader).value = curVal;
+				}
+			}
+			showBudgetEntryEditor("edit");
+		}
+	}
+}
+	
+function showBudgetEntryEditor(type) {
+	if(type == "addition") {
+		// clear for add
+		clearBudgetEntryEditor();
+		
+		// adjust editor for "addition mode"
+		document.getElementById("editorHeader2").textContent    = "Add new Entry";
+		document.getElementById("but_add_entry").style.display  = "";
+		document.getElementById("but_edit_entry").style.display = "none";
+		document.getElementById("but_del_entry").style.display  = "none";
+		
+	} else if (type == "edit") {
+		// adjust editor for "edit mode"
+		document.getElementById("editorHeader2").textContent = "Edit Entry";
+		document.getElementById("but_add_entry").style.display  = "none";
+		document.getElementById("but_edit_entry").style.display = "";
+		document.getElementById("but_del_entry").style.display  = "";
+	}
+	
+	// show editor after ready
+	document.getElementById("budget_entry_editor").style.display = "";
+}	
+	
+function hideBudgetEntryEditor() {
+	// hide editor 
+	clearBudgetEntryEditor();
+	document.getElementById("budget_entry_editor").style.display = "none";
+}	
+
+function clearBudgetEntryEditor() {
+	// fill editor fields with default value
+	document.getElementById('eName').value 		 = "";
+	document.getElementById('eDescrip').value	 = "";
+	document.getElementById('ePlanAmount').value = 0.00;
+	document.getElementById('eActuAmount').value = 0.00;
+	document.getElementById('ePaid').checked = false;
+}
 	
 /*
 * Save budget entry to server
@@ -98,7 +182,12 @@ function addEntry() {
 			
 			// redraw table
 			drawViewable();
-		}
+			hideBudgetEntryEditor();
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	console.log("Status: " + textStatus); 
+        	console.log("Error: " + errorThrown); 
+    	}  
 	});
 }
 
@@ -106,7 +195,40 @@ function addEntry() {
 * delete budget entry in server database
 */
 function removeEntry() {
+	// 
+	var eID = document.getElementById('eID').value;
 	
+	// for ajax
+	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
+	var entryData = {
+		"entryid": eID,
+	};
+	
+	// for table
+	var json_result;
+	
+	$.ajax({
+		url: reqUrl,
+		type: "POST",
+		data: {deleteBudgetEntryAjax:true, details:entryData},
+		datatype: "json",
+		success: function (result) {
+			//console.log(result);
+			json_result = jQuery.parseJSON(result);
+			
+			// show result message 
+			alert(json_result['message']);
+			
+			
+			// redraw table
+			loadBudgetTable();
+			hideBudgetEntryEditor();
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	console.log("Status: " + textStatus); 
+        	console.log("Error: " + errorThrown); 
+    	}  
+	});
 }
 
 /*
@@ -126,9 +248,6 @@ function modifyEntry() {
 	
 	// for table
 	var json_result;
-	
-	// *********PLACEHOLDER*********
-	eID = 27;
 	
 	// for ajax
 	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
@@ -155,6 +274,7 @@ function modifyEntry() {
 			//console.log(result);
 			json_result = jQuery.parseJSON(result);
 			if (json_result['status'] == 1) {
+				alert(json_result['message']);
 				// status 1 means ok, 0 means not changed, and -1 or -2 means error
 				// find the row number
 				//targetRow = gTableData.getFilteredRows([{column: 0, value: eID}])[0];	// should be only 1 row
@@ -177,17 +297,16 @@ function modifyEntry() {
 			}
 			
 			// redraw table
-			reloadBudgetTable();
-		}
+			loadBudgetTable();
+			hideBudgetEntryEditor();
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	console.log("Status: " + textStatus); 
+        	console.log("Error: " + errorThrown); 
+    	}  
 	});
 }
 
-/*
-* view budget entries from server 
-*/
-function viewEntry() {
-	
-}
 
 /*
 * ajax calls to retrieve server data
@@ -234,18 +353,19 @@ function getBudgetEntries() {
 				});
 				
 			}
+			
 			// re-draw budget table
+			// this function is placed here because ajax is async
 			drawViewable();
-		}
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	console.log("Status: " + textStatus); 
+        	console.log("Error: " + errorThrown); 
+    	}  
 	});
 }
 
-function drawViewable(){
-	gTableView = new google.visualization.DataView(gTableData);
-	gTableView.setColumns([1,2,3,4,5,6]); //here you set the columns you want to display
-	
-	gBudgetTable.draw(gTableView, {showRowNumber: true});
-}
+
 
 function formatBudgetEntriesForView() {
 	

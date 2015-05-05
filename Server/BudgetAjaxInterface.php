@@ -7,7 +7,6 @@ $BudgetCon = new BudgetConnection;
 if($_POST['getAllBudgetEntryAjax'] && $_POST['details'] != NULL) {
 	echo json_encode($BudgetCon -> getAllBudgetEntry(
 										$_POST['details']['aid']));
-	
 }
 
 
@@ -32,5 +31,8 @@ if($_POST['editBudgetEntryAjax'] && $_POST['details'] != NULL) {
 									$_POST['details']['entryIsPaid']));
 }
 
-
+if($_POST['deleteBudgetEntryAjax'] && $_POST['details'] != NULL) {
+	echo json_encode($BudgetCon -> delBudgetEntry(
+										$_POST['details']['entryid']));
+}
 ?>

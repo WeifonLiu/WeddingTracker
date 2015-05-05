@@ -107,7 +107,7 @@ class BudgetConnection
 				mysqli_commit($db);
 				
 			} else {
-				$retMsg = "FAILED: unable to add new Budget Entry";
+				$retMsg = "ERROR: unable to add new Budget Entry (A02)";
 				$retStatus = -2;
 				mysqli_rollback($db);
 			}
@@ -116,7 +116,7 @@ class BudgetConnection
 			mysqli_autocommit($db,TRUE);
 		} else {
 			// in DB already, Abort addition process
-			$retMsg = "FAILED: duplicate entry with same name detected";
+			$retMsg = "ERROR: duplicate entry with same name detected (A01)";
 			$retStatus = -1;
 		}
 
@@ -189,11 +189,16 @@ class BudgetConnection
 				mysqli_commit($db);
 			} else if ($affectRows == 0) {
 				// SUCCESSFUL, commit changes to DB
-				$retMsg = "ERROR: Input is the same as the system data, nothing changed";
+				$retMsg = "ERROR (E-00): Input is the same as the system data, nothing changed (E00)";
 				$retStatus = 0;
 				mysqli_rollback($db);
+			} else if ($affectRows == -1) {
+				// ERROR - Query ERROR 
+				$retMsg = "ERROR: Database failure. Please contact support (E01)";
+				$retStatus = -1;
+				mysqli_rollback($db);
 			} else {
-				$retMsg = "FAILED: Something went wrong, please try again";
+				$retMsg = "ERROR: Something went wrong, please try again (E02)";
 				$retStatus = -2;
 				mysqli_rollback($db);
 			}	
@@ -222,7 +227,7 @@ class BudgetConnection
 		// return variables 
 		$retMsg = ""; 		// return message
 		$retStatus = 0;		// return status (0 = no change; negative = error; positive = inserted ID)
-		$retPack = Array();	
+		$retPack = Array();	// an associative array containing info to return 
 		
 		
 		// if no database connection, connect to it;
@@ -241,9 +246,42 @@ class BudgetConnection
 		$sql_del = "DELETE FROM `budget` WHERE `bid`=" . $id;
 		$qRet_del = mysqli_query($db,$sql_del);
 		$affectRows = mysqli_affected_rows($db);
-		
-	}
 	
+		if ($affectRows == 1) {
+			// SUCCESSFUL, commit changes to DB
+			$retMsg = "SUCCESS: Delete the Budget Entry";
+			$retStatus = 1;
+			mysqli_commit($db);
+			
+		} else if ($affectRows == 0) {
+			// ERROR - no affected row, no change
+			$retMsg = "ERROR (D-00): Unable to find target entry, please verify submission.(D00)";
+			$retStatus = 0;
+			mysqli_rollback($db);
+			
+		} else if ($affectRows == -1) {
+			// ERROR - no affected row, no change
+			$retMsg = "ERROR (D-1): Database failure. Please contact support. (D01)";
+			$retStatus = -1;
+			mysqli_rollback($db);
+		
+		} else {
+			$retMsg = "ERROR: unexpected error, please try again later.".
+						"If the problem consist, please contact support. (D02)" ;
+			$retStatus = -2;
+			mysqli_rollback($db);
+		}	
+		
+		// end transaction 
+		mysqli_autocommit($db,TRUE);
+		
+		// prepare return package
+		$retPack = [
+			"status" => $retStatus,		
+			"message" => $retMsg,
+		];
+		return $retPack;
+	}
 }
 
 ?>

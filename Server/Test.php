@@ -17,7 +17,9 @@ $BudgetCon = new BudgetConnection;
 ?>
 
 <?php 
+	echo var_dump($BudgetCon -> delBudgetEntry(28));
 
+/*
 	echo var_dump($BudgetCon -> editBudgetEntry(
 									0,
 									27,
@@ -26,6 +28,7 @@ $BudgetCon = new BudgetConnection;
 									350,
 									341,
 									false));
+*/
 									
 									/*
 									
