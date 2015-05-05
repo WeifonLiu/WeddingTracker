@@ -6,6 +6,11 @@ var gBudgetTable;
 var gTableData;
 var gTableView;
 
+// budget editor dialog variable
+var budget_editor_form; 
+var budget_editor_dialog; 	// dialog (popup) contains the form(fields)
+		
+
 // onLoad initialization
 google.setOnLoadCallback(initBudgetTable);
 
@@ -42,13 +47,13 @@ function loadBudgetTable() {
 	
 function setBudgetTableHeader() {
 	// add columns to budget table
-	gTableData.addColumn('number', 	'Entry ID', 			'ID');
-	gTableData.addColumn('string', 	'Entry Name', 			'Name');
-	gTableData.addColumn('string',	'Detail Description', 	'Descrip');
-	gTableData.addColumn('string',	'Last Modified Date', 	'Date');
-	gTableData.addColumn('number',	'Planned Amount($)', 	'PlanAmount');
-	gTableData.addColumn('number',	'Actual Amount($)', 	'ActuAmount');
-	gTableData.addColumn('boolean',	'Paid In Full', 		'Paid');
+	gTableData.addColumn('number', 	'Entry ID', 			'entry_id');
+	gTableData.addColumn('string', 	'Entry Name', 			'name');
+	gTableData.addColumn('string',	'Detail Description', 	'descrip');
+	gTableData.addColumn('string',	'Last Modified Date', 	'date');
+	gTableData.addColumn('number',	'Planned Amount($)', 	'plan_amount');
+	gTableData.addColumn('number',	'Actual Amount($)', 	'actu_amount');
+	gTableData.addColumn('boolean',	'Paid In Full', 		'is_paid');
 }	
 
 function drawViewable(){
@@ -68,11 +73,13 @@ function selectionHandler() {
 	var selected;			// the current item in the array
 	var curHeader, curVal;	// the current header ID and value of the selected cell
 	
+	budget_editor_dialog.dialog( "open" );
+	
 	selections = gBudgetTable.getSelection();	
 	
 	if (selections.length == 0) {
 		// when a de-selection is triggered
-		hideBudgetEntryEditor();
+		budget_editor_dialog.dialog( "close" );
 	} else {
 		// when something is selected 
 		selected = selections[FIRST_SELECTION];
@@ -83,18 +90,19 @@ function selectionHandler() {
 				curVal = gTableData.getValue(selected.row, iterCol);
 				
 				// update the editor fields 
-				if (curHeader == "Paid") {
-					document.getElementById("e"+ curHeader).checked = curVal;
-				} else if (curHeader != "Date") {
+				if (curHeader == "is_paid") {
+					$( "#" + curHeader)[0].checked = curVal;
+				} else if (curHeader != "date") {
 					// skip "Date" value, as it is not editable for user
-					document.getElementById("e"+ curHeader).value = curVal;
+					$( "#" + curHeader)[0].value = curVal;
 				}
 			}
-			showBudgetEntryEditor("edit");
+			//showBudgetEntryEditor("edit");
+			
 		}
 	}
 }
-	
+/*	hide old editor 
 function showBudgetEntryEditor(type) {
 	if(type == "addition") {
 		// clear for add
@@ -132,6 +140,8 @@ function clearBudgetEntryEditor() {
 	document.getElementById('eActuAmount').value = 0.00;
 	document.getElementById('ePaid').checked = false;
 }
+
+*/	
 	
 /*
 * Save budget entry to server
@@ -140,12 +150,21 @@ function addEntry() {
 	// user id
 	var uid = 0;
 	
+	/*	disable old view 
 	// get fields info 
 	var eName = document.getElementById('eName').value;
 	var eDesc = document.getElementById('eDescrip').value;
 	var ePlanAmount = parseFloat(document.getElementById('ePlanAmount').value);
 	var eActuAmount = parseFloat(document.getElementById('eActuAmount').value);
 	var ePaid = document.getElementById('ePaid').checked;
+	*/
+	
+	// get fields input from editor dialog 
+	var eName = $( "#name" )[0].value;
+	var eDesc = $( "#descrip" )[0].value;
+	var ePlanAmount = parseFloat($( "#plan_amount" )[0].value);
+	var eActuAmount = parseFloat($( "#actu_amount" )[0].value);
+	var ePaid = $( "#is_paid" )[0].checked;
 	
 	// for table
 	var json_result;
@@ -182,7 +201,7 @@ function addEntry() {
 			
 			// redraw table
 			drawViewable();
-			hideBudgetEntryEditor();
+			
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) { 
         	console.log("Status: " + textStatus); 
@@ -195,8 +214,11 @@ function addEntry() {
 * delete budget entry in server database
 */
 function removeEntry() {
-	// 
-	var eID = document.getElementById('eID').value;
+	// disable old editor  
+	//var eID = document.getElementById('eID').value;
+	
+	// get fields input from editor dialog 
+	var eID = $( "#entry_id" )[0].value;
 	
 	// for ajax
 	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
@@ -222,7 +244,6 @@ function removeEntry() {
 			
 			// redraw table
 			loadBudgetTable();
-			hideBudgetEntryEditor();
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) { 
         	console.log("Status: " + textStatus); 
@@ -238,6 +259,7 @@ function modifyEntry() {
 	// user id
 	var uid = 0;
 	
+	/* disable old editor 
 	// get fields info 
 	var eID = document.getElementById('eID').value;
 	var eName = document.getElementById('eName').value;
@@ -245,6 +267,15 @@ function modifyEntry() {
 	var ePlanAmount = parseFloat(document.getElementById('ePlanAmount').value);
 	var eActuAmount = parseFloat(document.getElementById('eActuAmount').value);
 	var ePaid = document.getElementById('ePaid').checked;
+	*/
+	
+	// get fields input from editor dialog 
+	var eID = $( "#entry_id" )[0].value;
+	var eName = $( "#name" )[0].value;
+	var eDesc = $( "#descrip" )[0].value;
+	var ePlanAmount = parseFloat($( "#plan_amount" )[0].value);
+	var eActuAmount = parseFloat($( "#actu_amount" )[0].value);
+	var ePaid = $( "#is_paid" )[0].checked;
 	
 	// for table
 	var json_result;
@@ -298,7 +329,6 @@ function modifyEntry() {
 			
 			// redraw table
 			loadBudgetTable();
-			hideBudgetEntryEditor();
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) { 
         	console.log("Status: " + textStatus); 
@@ -366,13 +396,104 @@ function getBudgetEntries() {
 }
 
 
-
-function formatBudgetEntriesForView() {
-	
-}
-
 function calculateTotalExpenditure() {
 
 }
 
-// TODO - Add available budget 	
+
+/*
+* For the following dialog code, 
+* it is derived from the sample code provided in jQuery-ui tutorial
+* https://jqueryui.com/dialog/#modal-form
+*/
+// when document ready 
+$(function() {
+	// budget editor variable 
+	var id = $( "#entry_id" ),
+		name = $( "#name" ),
+		description = $( "#descrip" ),
+		plan_amount = $( "#plan_amount" ),
+		actu_amount = $( "#actu_amount" ),
+		is_paid = $( "#is_paid" ),
+		allFields = $( [] ).add( id ).add( name ).add( description ).add( plan_amount ).add( actu_amount ).add( is_paid ),
+		tips = $( ".validateTips" );	
+	
+	// showing tool tips (copy from jquery-ui tutorial)
+	function updateTips( t ) {
+		tips
+			.text( t )
+			.addClass( "ui-state-highlight" );
+		setTimeout(function() {
+			tips.removeClass( "ui-state-highlight", 1500 );
+		}, 500 );
+    }
+ 
+	// checking restricted length requirement (copy from jquery-ui tutorial)
+    function checkLength( o, n, min, max ) {
+		if ( o.val().length > max || o.val().length < min ) {
+			o.addClass( "ui-state-error" );
+			updateTips( "Length of " + n + " must be between " +
+				min + " and " + max + "." );
+			return false;
+		} else {
+			return true;
+		}
+    }
+
+	// checking acceptable characters (copy from jquery-ui tutorial)
+    function checkRegexp( o, regexp, n ) {
+		if ( !( regexp.test( o.val() ) ) ) {
+			o.addClass( "ui-state-error" );
+			updateTips( n );
+			return false;
+		} else {
+			return true;
+		}
+    }
+	
+	
+	// popup budget entry editor 
+    budget_editor_dialog = $( "#budget_editor_dialog_form" ).dialog({
+		autoOpen: false,
+		height: 400,
+		width: 550,
+		modal: true,
+		buttons: {
+        //"Create an account": addUser,
+			Add: function() {
+				addEntry();
+				budget_editor_dialog.dialog( "close" );
+			},
+			Save: function() {
+				modifyEntry();
+				budget_editor_dialog.dialog( "close" );
+			},
+			Delete: function() {
+				if (confirm("WARNING: this action cannot be undone!") == true) {
+					removeEntry();
+				}				
+				budget_editor_dialog.dialog( "close" );
+			},
+			Cancel: function() {
+				budget_editor_dialog.dialog( "close" );
+			}
+		},
+		open: function() {
+				
+		},
+        close: function() {
+        budget_editor_form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+        }
+    });
+ 
+    budget_editor_form = $( "#budget_editor_form" ).on( "submit", function( event ) {
+		event.preventDefault();
+    });
+ 
+    $( "#add_new_entry_dialog" ).button().on( "click", function() {
+		budget_editor_dialog.dialog( "open" );
+    });
+
+});
+

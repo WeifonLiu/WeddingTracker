@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>My Wedding Planner</title>	
+	<link rel="stylesheet" href="css/budget.css">
 </head>
 <body>
 	<h1>My Wedding Planner</h1>
@@ -16,78 +17,38 @@
 	<div id="budget_view">
 		<h2> this is budget view </h2>
 		<div id="BudgetTable_div"></div>
-		
-		<button id="but_show_editor" type="button" onclick="showBudgetEntryEditor('addition')"> Create New Budget Entry </button>
+		<br>
+		<button id="add_new_entry_dialog" > Create New Budget Entry </button>
 	</div>
-	<div id="budget_entry_editor" class="Table" style="display:none">
-		<div class="Title">
-			<h2 id="editorHeader2"></h2>
-			<input type="hidden" id="eID">
-		</div>
-		<div class="Row">
-			<div class="Cell">
-				<p> Name: </p>
-			</div>
-			<div class="Cell">
-				<p> <input type="text" id="eName"> </p>
-			</div>
-		</div>
-		<div class="Row">
-			<div class="Cell">
-				<p> Description: </p>
-			</div>
-			<div class="Cell">
-				<p> <textarea id="eDescrip" rows="4" cols="50"></textarea> </p>
-			</div>
-		</div>
-		<div class="Row" style="display:none">	<!-- temp disable this feature -->
-			<div class="Cell">
-				<p> Last Modified Date:  </p>
-			</div>
-			<div class="Cell">
-				<p> <input type="text" id="eDate"> </p>
-			</div>
-		</div> 
-		<div class="Row">
-			<div class="Cell">
-				<p> Planned Amount($): </p>
-			</div>
-			<div class="Cell">
-				<p> <input type="text" id="ePlanAmount"> </p>
-			</div>
-		</div>
-		<div class="Row">
-			<div class="Cell">
-				<p> Actual Amount($):</p>
-			</div>
-			<div class="Cell">
-				<p> <input type="text" id="eActuAmount"> </p>
-			</div>
-		</div>
-		<div class="Row">
-			<div class="Cell">
-				<p> Already Paid </p>
-			</div>
-			<div class="Cell">
-				<p> <input type="checkbox" id="ePaid"> </p>
-			</div>
-		</div>
-		<div class="Row">
-			<div class="Cell">
-				<button id="but_add_entry" type="button" onclick="addEntry()"> Add </button>
-				<button id="but_edit_entry" type="button" onclick="modifyEntry()"> Edit </button>
-				<button id="but_hide_editor" type="button" onclick="hideBudgetEntryEditor()"> Cancel </button>
-				<button id="but_del_entry" type="button" onclick="removeEntry()"> Delete Entry </button>
-			</div>
-		</div>
-	</div>
+	
+	<div id="budget_editor_dialog_form" title="Budget Entry Editor">
+        <p class="validateTips"><span style="color:red">*</span> form fields are required.</p>
+ 
+        <form id="budget_editor_form">
+			<input type="hidden" id="entry_id">
+            <fieldset class="editor">
+                <label for="name">Name <span style="color:red">*</span></label>
+                <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
+                <label for="descrip">Description</label>
+                <input type="text" name="descrip" id="descrip" class="text ui-widget-content ui-corner-all">
+                <label for="plan_amount">Planned Amount ($)</label>
+                <input type="number" name="plan_amount" id="plan_amount" class="text ui-widget-content ui-corner-all">
+                <label for="actu_amount">Actual Amount ($)</label>
+                <input type="number" name="actu_amount" id="actu_amount" class="text ui-widget-content ui-corner-all">
+    	        <label for="is_paid">Paid</label>
+                <input type="checkbox" name="is_paid" id="is_paid" class="text ui-widget-content ui-corner-all">		
+			
+			<!-- Allow form submission with keyboard without duplicating the dialog button -->
+                <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+            </fieldset>
+        </form>
+    </div>
 	
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
 	
-	<link rel="stylesheet" href="css/budget.css">
 	<script src="js/menu.js"></script>
 	<script src="js/budget.js"></script>
 </body>
