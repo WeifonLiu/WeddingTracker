@@ -3,10 +3,17 @@
 	width: 50%;
     margin: 0 auto;
 }
-/* The following are copies from jQuery-UI dialog*/
+
+.summary_details 
+{
+	font-size: 2em;
+}
+
+/* The following are derivative work from jQuery-UI dialog*/
 body 
 { 
-	font-size: 62.5%; 
+	font-size: 62.5%;
+	font-family: Tahoma, Geneva, sans-serif;
 }
 
 label, input 

@@ -7,10 +7,17 @@
 	<div id="overview" class="view-point">
 		<h2> Overview </h2>
 		<div id="summary">
-			<label> Last Update: </label>           <label id="lab_last_update"></label><br>
-			<label> Total Estimated Cost: </label>  <label id="lab_total_estimated"></label><br>
-			<label> Total Pending Payment: </label> <label id="lab_pending_payment"></label><br>
-			<label> Total Actual Payment: </label>  <label id="lab_actu_payment"></label><br>
+			<label class="summary_details"> Last Update: </label>           
+			<label class="summary_details"id="lab_last_update"></label><br>
+			
+			<label class="summary_details"> Total Estimated Cost: </label>  
+			<label class="summary_details"id="lab_total_estimated"></label><br>
+			
+			<label class="summary_details"> Total Pending Payment: </label> 
+			<label class="summary_details"id="lab_pending_payment"></label><br>
+			
+			<label class="summary_details"> Total Actual Payment: </label>  
+			<label class="summary_details"id="lab_actu_payment"></label><br>
 		</div>
 	</div>
 	
@@ -30,7 +37,8 @@
                 <label for="name">Name <span style="color:red">*</span></label>
                 <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
                 <label for="descrip">Description</label>
-                <input type="text" name="descrip" id="descrip" class="text ui-widget-content ui-corner-all">
+                <!--<input type="text" name="descrip" id="descrip" class="text ui-widget-content ui-corner-all"> -->
+				<textarea name="descrip" id="descrip" rows="4" cols="67" class="text ui-widget-content ui-corner-all"></textarea>
                 <label for="plan_amount">Estimated Cost($)</label>
                 <input type="number" name="plan_amount" id="plan_amount" class="text ui-widget-content ui-corner-all">
                 <label for="actu_amount">Actual Cost($)</label>

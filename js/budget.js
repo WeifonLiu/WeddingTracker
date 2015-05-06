@@ -252,7 +252,7 @@ function addEntry() {
 				]);
 				
 				// update summary
-				if (entry_detail['is_Paid']) {
+				if (ePaid) {
 					// Paid, so actual amount goest to "total paid"
 					updateSummary(json_result['modified_date_value'], ePlanAmount,
 								0, eActuAmount);
@@ -453,7 +453,7 @@ $(function() {
 	// popup budget entry editor 
     gBudgetEditorDialog = $( "#budget_editor_dialog_form" ).dialog({
 		autoOpen: false,
-		height: 400,
+		height: 450,
 		width: 550,
 		modal: true,
 		buttons: {
