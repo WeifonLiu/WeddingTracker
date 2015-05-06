@@ -42,6 +42,7 @@ class BudgetConnection
 			$entry['entry_id'] = $entry['bid'];
 			unset($entry['bid']);
 			// format sql date for view
+			$entry['modified_date_value'] = $entry['modified_date'];
 			$entry['modified_date'] = date("Y-M-d", strtotime($entry['modified_date']));
 			// prepare a list to return
 			$retList[] = $entry;
@@ -125,6 +126,7 @@ class BudgetConnection
 			"status" => $retStatus,		
 			"message" => $retMsg,
 			"modified_date" => date("Y-M-d", strtotime($date)),
+			"modified_date_value" => $date,
 		];
 		return $retPack;
 	}
@@ -212,6 +214,7 @@ class BudgetConnection
 			"status" => $retStatus,		
 			"message" => $retMsg,
 			"modified_date" => date("Y-M-d", strtotime($date)),
+			"modified_date_value" => $date,
 		];
 		return $retPack;
 		

@@ -1,33 +1,61 @@
 // import google chart library
 google.load("visualization", "1", {packages:["table"]});
 
-// global variable
+// Global variables
+// Overview Variable
+var gLastModDate;
+var gTotalEst;
+var gTotalPending;
+var gTotalPaid;
+
+// Detail table variable 
 var gBudgetTable;
 var gTableData;
 var gTableView;
 
 // budget editor dialog variable
-var budget_editor_form; 
-var budget_editor_dialog; 	// dialog (popup) contains the form(fields)
+var gBudgetEditorForm; 
+var gBudgetEditorDialog; 	// dialog (popup) contains the form(fields)
 		
 
 // onLoad initialization
 google.setOnLoadCallback(initBudgetTable);
 
 
-function init() {
-	$( "#eDate" ).datepicker();
-}
+
 /*
 * setup table view
 */
 function initBudgetTable() {
+	initSummary();
+
 	// new 
 	gBudgetTable = new google.visualization.Table(document.getElementById('BudgetTable_div'));
 	
 	// load budget table
 	loadBudgetTable();
+}
 
+function showSummary() {
+	$("#lab_last_update")[0].textContent     = gLastModDate;
+	$("#lab_total_estimated")[0].textContent = "$ " + gTotalEst;
+	$("#lab_pending_payment")[0].textContent = "$ " + gTotalPending;
+	$("#lab_actu_payment")[0].textContent    = "$ " + gTotalPaid;
+}
+
+function initSummary() {
+	// set default value
+	gLastModDate = "";
+	gTotalEst = 0;
+	gTotalPending = 0;
+	gTotalPaid = 0;
+}
+
+function updateSummary(date, est, pending, paid) {
+	gLastModDate = (gLastModDate > date) ? gLastModDate : date;	//keep the later (greater) date
+	gTotalEst += est;
+	gTotalPending += pending;
+	gTotalPaid += paid;
 }
 
 /*
@@ -51,8 +79,8 @@ function setBudgetTableHeader() {
 	gTableData.addColumn('string', 	'Entry Name', 			'name');
 	gTableData.addColumn('string',	'Detail Description', 	'descrip');
 	gTableData.addColumn('string',	'Last Modified Date', 	'date');
-	gTableData.addColumn('number',	'Planned Amount($)', 	'plan_amount');
-	gTableData.addColumn('number',	'Actual Amount($)', 	'actu_amount');
+	gTableData.addColumn('number',	'Estimated Cost($)', 	'plan_amount');
+	gTableData.addColumn('number',	'Actual Cost($)', 	'actu_amount');
 	gTableData.addColumn('boolean',	'Paid In Full', 		'is_paid');
 }	
 
@@ -73,13 +101,13 @@ function selectionHandler() {
 	var selected;			// the current item in the array
 	var curHeader, curVal;	// the current header ID and value of the selected cell
 	
-	budget_editor_dialog.dialog( "open" );
+	gBudgetEditorDialog.dialog( "open" );
 	
 	selections = gBudgetTable.getSelection();	
 	
 	if (selections.length == 0) {
 		// when a de-selection is triggered
-		budget_editor_dialog.dialog( "close" );
+		gBudgetEditorDialog.dialog( "close" );
 	} else {
 		// when something is selected 
 		selected = selections[FIRST_SELECTION];
@@ -102,62 +130,87 @@ function selectionHandler() {
 		}
 	}
 }
-/*	hide old editor 
-function showBudgetEntryEditor(type) {
-	if(type == "addition") {
-		// clear for add
-		clearBudgetEntryEditor();
-		
-		// adjust editor for "addition mode"
-		document.getElementById("editorHeader2").textContent    = "Add new Entry";
-		document.getElementById("but_add_entry").style.display  = "";
-		document.getElementById("but_edit_entry").style.display = "none";
-		document.getElementById("but_del_entry").style.display  = "none";
-		
-	} else if (type == "edit") {
-		// adjust editor for "edit mode"
-		document.getElementById("editorHeader2").textContent = "Edit Entry";
-		document.getElementById("but_add_entry").style.display  = "none";
-		document.getElementById("but_edit_entry").style.display = "";
-		document.getElementById("but_del_entry").style.display  = "";
-	}
-	
-	// show editor after ready
-	document.getElementById("budget_entry_editor").style.display = "";
-}	
-	
-function hideBudgetEntryEditor() {
-	// hide editor 
-	clearBudgetEntryEditor();
-	document.getElementById("budget_entry_editor").style.display = "none";
-}	
 
-function clearBudgetEntryEditor() {
-	// fill editor fields with default value
-	document.getElementById('eName').value 		 = "";
-	document.getElementById('eDescrip').value	 = "";
-	document.getElementById('ePlanAmount').value = 0.00;
-	document.getElementById('eActuAmount').value = 0.00;
-	document.getElementById('ePaid').checked = false;
+
+/*
+* ajax calls to retrieve server data
+* TODO: add account feature 
+*/
+function getBudgetEntries() {
+	
+	// user id
+	var uid = 0;		// TODO: placeholder, as account feature not available
+	
+	// for ajax
+	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
+	var userData = {
+		"aid": uid
+	};
+	
+	// initialize summary data (clear old data)
+	initSummary();
+	
+	$.ajax({
+		url: reqUrl,
+		type: "POST",
+		data: {getAllBudgetEntryAjax:true, details:userData},
+		datatype: "json",
+		success: function (result) {
+			//console.log(result);
+			json_result = jQuery.parseJSON(result);
+			if (json_result != []) {
+				$.each(json_result, function(entry_key, entry_detail) {
+					// Attention: need to parseInt(amounts) because json parse amounts to string
+					entry_detail['entry_id'] = parseInt(entry_detail['entry_id']);
+					entry_detail['planned_amount'] = parseInt(entry_detail['planned_amount']);
+					entry_detail['actual_amount'] = parseInt(entry_detail['actual_amount']);
+					// need to parse bool from string "0" and "1"
+					entry_detail['is_Paid'] = entry_detail['is_Paid'] == "0" ? false : true;
+					
+					// update table data
+					gTableData.addRows([
+						[entry_detail['entry_id'], 
+						entry_detail['name'], 
+						entry_detail['description'], 
+						{v: entry_detail['modified_date_value'], f: entry_detail['modified_date']},
+						//entry_detail['modified_date'], 
+						{v: entry_detail['planned_amount'], f: '$' + entry_detail['planned_amount']}, 
+						{v: entry_detail['actual_amount'], f: '$' + entry_detail['actual_amount']}, 
+						entry_detail['is_Paid']]
+					]);
+					
+					// update summary
+					if (entry_detail['is_Paid']) {
+						// Paid, so actual amount goest to "total paid"
+						updateSummary(entry_detail['modified_date_value'], entry_detail['planned_amount'],
+									0, entry_detail['actual_amount']);
+					} else {
+						// Not Paid, so actual goest to "pending"
+						updateSummary(entry_detail['modified_date_value'], entry_detail['planned_amount'],
+									entry_detail['actual_amount'], 0);
+					}
+				});
+			}
+			
+			// Show summary to the overview section 
+			showSummary();
+			// re-draw budget table
+			// this function is placed here because ajax is async
+			drawViewable();
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	console.log("Status: " + textStatus); 
+        	console.log("Error: " + errorThrown); 
+    	}  
+	});
 }
 
-*/	
-	
 /*
 * Save budget entry to server
 */
 function addEntry() {
 	// user id
 	var uid = 0;
-	
-	/*	disable old view 
-	// get fields info 
-	var eName = document.getElementById('eName').value;
-	var eDesc = document.getElementById('eDescrip').value;
-	var ePlanAmount = parseFloat(document.getElementById('ePlanAmount').value);
-	var eActuAmount = parseFloat(document.getElementById('eActuAmount').value);
-	var ePaid = document.getElementById('ePaid').checked;
-	*/
 	
 	// get fields input from editor dialog 
 	var eName = $( "#name" )[0].value;
@@ -192,13 +245,26 @@ function addEntry() {
 				gTableData.addRows([
 					[json_result['status'], 	//inserted entry_id is represented as status
 					eName, eDesc, 
-					json_result['modified_date'], 
+					{v: json_result['modified_date_value'], f: json_result['modified_date']},
 					{v: ePlanAmount, f: '$' + ePlanAmount}, 
 					{v: eActuAmount, f: '$' + eActuAmount}, 
 					ePaid]
 				]);
+				
+				// update summary
+				if (entry_detail['is_Paid']) {
+					// Paid, so actual amount goest to "total paid"
+					updateSummary(json_result['modified_date_value'], ePlanAmount,
+								0, eActuAmount);
+				} else {
+					// Not Paid, so actual goest to "pending"
+					updateSummary(json_result['modified_date_value'], ePlanAmount,
+								eActuAmount, 0);
+				}
 			}
 			
+			// Show summary to the overview section 
+			showSummary();
 			// redraw table
 			drawViewable();
 			
@@ -214,9 +280,6 @@ function addEntry() {
 * delete budget entry in server database
 */
 function removeEntry() {
-	// disable old editor  
-	//var eID = document.getElementById('eID').value;
-	
 	// get fields input from editor dialog 
 	var eID = $( "#entry_id" )[0].value;
 	
@@ -258,16 +321,6 @@ function removeEntry() {
 function modifyEntry() {
 	// user id
 	var uid = 0;
-	
-	/* disable old editor 
-	// get fields info 
-	var eID = document.getElementById('eID').value;
-	var eName = document.getElementById('eName').value;
-	var eDesc = document.getElementById('eDescrip').value;
-	var ePlanAmount = parseFloat(document.getElementById('ePlanAmount').value);
-	var eActuAmount = parseFloat(document.getElementById('eActuAmount').value);
-	var ePaid = document.getElementById('ePaid').checked;
-	*/
 	
 	// get fields input from editor dialog 
 	var eID = $( "#entry_id" )[0].value;
@@ -338,62 +391,6 @@ function modifyEntry() {
 }
 
 
-/*
-* ajax calls to retrieve server data
-* TODO: add account feature 
-*/
-function getBudgetEntries() {
-	
-	// user id
-	var uid = 0;		// TODO: placeholder, as account feature not available
-	
-	// for ajax
-	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
-	var userData = {
-		"aid": uid
-	};
-	
-	$.ajax({
-		url: reqUrl,
-		type: "POST",
-		data: {getAllBudgetEntryAjax:true, details:userData},
-		datatype: "json",
-		success: function (result) {
-			//console.log(result);
-			json_result = jQuery.parseJSON(result);
-			if (json_result != []) {
-				$.each(json_result, function(entry_key, entry_detail) {
-					// Attention: need to parseInt(amounts) because json parse amounts to string
-					entry_detail['entry_id'] = parseInt(entry_detail['entry_id']);
-					entry_detail['planned_amount'] = parseInt(entry_detail['planned_amount']);
-					entry_detail['actual_amount'] = parseInt(entry_detail['actual_amount']);
-					// need to parse bool from string "0" and "1"
-					entry_detail['is_Paid'] = entry_detail['is_Paid'] == "0" ? false : true;
-					
-					// update table data
-					gTableData.addRows([
-						[entry_detail['entry_id'], 
-						entry_detail['name'], 
-						entry_detail['description'], 
-						entry_detail['modified_date'], 
-						{v: entry_detail['planned_amount'], f: '$' + entry_detail['planned_amount']}, 
-						{v: entry_detail['actual_amount'], f: '$' + entry_detail['actual_amount']}, 
-						entry_detail['is_Paid']]
-					]);
-				});
-				
-			}
-			
-			// re-draw budget table
-			// this function is placed here because ajax is async
-			drawViewable();
-		},
-		error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        	console.log("Status: " + textStatus); 
-        	console.log("Error: " + errorThrown); 
-    	}  
-	});
-}
 
 
 function calculateTotalExpenditure() {
@@ -415,7 +412,8 @@ $(function() {
 		plan_amount = $( "#plan_amount" ),
 		actu_amount = $( "#actu_amount" ),
 		is_paid = $( "#is_paid" ),
-		allFields = $( [] ).add( id ).add( name ).add( description ).add( plan_amount ).add( actu_amount ).add( is_paid ),
+		allFields = $( [] ).add( id ).add( name ).add( description ).
+							add( plan_amount ).add( actu_amount ).add( is_paid ),
 		tips = $( ".validateTips" );	
 	
 	// showing tool tips (copy from jquery-ui tutorial)
@@ -453,7 +451,7 @@ $(function() {
 	
 	
 	// popup budget entry editor 
-    budget_editor_dialog = $( "#budget_editor_dialog_form" ).dialog({
+    gBudgetEditorDialog = $( "#budget_editor_dialog_form" ).dialog({
 		autoOpen: false,
 		height: 400,
 		width: 550,
@@ -462,37 +460,37 @@ $(function() {
         //"Create an account": addUser,
 			Add: function() {
 				addEntry();
-				budget_editor_dialog.dialog( "close" );
+				gBudgetEditorDialog.dialog( "close" );
 			},
 			Save: function() {
 				modifyEntry();
-				budget_editor_dialog.dialog( "close" );
+				gBudgetEditorDialog.dialog( "close" );
 			},
 			Delete: function() {
 				if (confirm("WARNING: this action cannot be undone!") == true) {
 					removeEntry();
 				}				
-				budget_editor_dialog.dialog( "close" );
+				gBudgetEditorDialog.dialog( "close" );
 			},
 			Cancel: function() {
-				budget_editor_dialog.dialog( "close" );
+				gBudgetEditorDialog.dialog( "close" );
 			}
 		},
 		open: function() {
 				
 		},
         close: function() {
-        budget_editor_form[ 0 ].reset();
+        gBudgetEditorForm[ 0 ].reset();
         allFields.removeClass( "ui-state-error" );
         }
     });
  
-    budget_editor_form = $( "#budget_editor_form" ).on( "submit", function( event ) {
+    gBudgetEditorForm = $( "#budget_editor_form" ).on( "submit", function( event ) {
 		event.preventDefault();
     });
  
     $( "#add_new_entry_dialog" ).button().on( "click", function() {
-		budget_editor_dialog.dialog( "open" );
+		gBudgetEditorDialog.dialog( "open" );
     });
 
 });

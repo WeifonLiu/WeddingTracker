@@ -2,22 +2,22 @@
 <html>
 <head>
 	<title>My Wedding Planner</title>	
-	<link rel="stylesheet" href="css/budget.css">
 </head>
 <body>
-	<h1>My Wedding Planner</h1>
-
-	<div id="main_menu" style="display:none">	<!-- hidden because, not meaningful yet -->
-		<button id="but_itinerary" type="button" onclick="hideMenu()">Itinerary</button>
-		<button id="but_budget" type="button" onclick="showBudgetTable()">Budget</button>
+	<div id="overview" class="view-point">
+		<h2> Overview </h2>
+		<div id="summary">
+			<label> Last Update: </label>           <label id="lab_last_update"></label><br>
+			<label> Total Estimated Cost: </label>  <label id="lab_total_estimated"></label><br>
+			<label> Total Pending Payment: </label> <label id="lab_pending_payment"></label><br>
+			<label> Total Actual Payment: </label>  <label id="lab_actu_payment"></label><br>
+		</div>
 	</div>
-	<div id="itinerary_view" style="display:none"> <!-- hidden because, not implemented -->
-		<h2> this is itinerary view </h2>
-	</div>
-	<div id="budget_view">
-		<h2> this is budget view </h2>
-		<div id="BudgetTable_div"></div>
-		<br>
+	
+	<div id="budget_view" class="view-point">
+		<h2> Current Budget details </h2>
+		<div id="BudgetTable_div"></div> <br>
+		
 		<button id="add_new_entry_dialog" > Create New Budget Entry </button>
 	</div>
 	
@@ -31,14 +31,14 @@
                 <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
                 <label for="descrip">Description</label>
                 <input type="text" name="descrip" id="descrip" class="text ui-widget-content ui-corner-all">
-                <label for="plan_amount">Planned Amount ($)</label>
+                <label for="plan_amount">Estimated Cost($)</label>
                 <input type="number" name="plan_amount" id="plan_amount" class="text ui-widget-content ui-corner-all">
-                <label for="actu_amount">Actual Amount ($)</label>
+                <label for="actu_amount">Actual Cost($)</label>
                 <input type="number" name="actu_amount" id="actu_amount" class="text ui-widget-content ui-corner-all">
     	        <label for="is_paid">Paid</label>
                 <input type="checkbox" name="is_paid" id="is_paid" class="text ui-widget-content ui-corner-all">		
 			
-			<!-- Allow form submission with keyboard without duplicating the dialog button -->
+				<!-- Allow form submission with keyboard without duplicating the dialog button -->
                 <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
             </fieldset>
         </form>
@@ -49,6 +49,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
 	
+	<link rel="stylesheet" href="css/budget.css">
 	<script src="js/menu.js"></script>
 	<script src="js/budget.js"></script>
 </body>
