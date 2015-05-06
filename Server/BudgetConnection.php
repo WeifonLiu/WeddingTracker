@@ -57,6 +57,13 @@ class BudgetConnection
 	
 	/*
 	*	create a new budget entry in DB
+	*	@param:	aid : account id for verification
+	*			entryId : particular entry ID as key 
+	*			name : name of the entry 
+	* 			desc : new description 
+	*			plan_amount : the estimated cost
+	* 			actual_amount : the actual cost 
+	*			is_paid : whether this entry is paid in full or not 
 	*/
 	function addBudgetEntry($aid, $name, $desc, $plan_amount, 
 							$actual_amount, $is_paid) {

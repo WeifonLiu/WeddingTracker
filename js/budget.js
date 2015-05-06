@@ -130,7 +130,8 @@ function getBudgetEntries() {
 	var uid = 0;		// TODO: placeholder, as account feature not available
 	
 	// for ajax
-	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
+	var reqUrl = "http://" + window.location.host + 
+							"/WeddingTracker/Server/BudgetAjaxInterface.php";
 	var userData = {
 		"aid": uid
 	};
@@ -211,7 +212,8 @@ function addEntry() {
 	var json_result;
 	
 	// for ajax
-	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
+	var reqUrl = "http://" + window.location.host + 
+							"/WeddingTracker/Server/BudgetAjaxInterface.php";
 	var entryData = {
 		"aid": uid,
 		"entryName": eName,
@@ -272,7 +274,8 @@ function removeEntry() {
 	var eID = $( "#entry_id" )[0].value;
 	
 	// for ajax
-	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
+	var reqUrl = "http://" + window.location.host + 
+							"/WeddingTracker/Server/BudgetAjaxInterface.php";
 	var entryData = {
 		"entryid": eID,
 	};
@@ -322,7 +325,8 @@ function modifyEntry() {
 	var json_result;
 	
 	// for ajax
-	var reqUrl = "http://192.168.0.50/WeddingTracker/Server/BudgetAjaxInterface.php";
+	var reqUrl = "http://" + window.location.host + 
+							"/WeddingTracker/Server/BudgetAjaxInterface.php";
 	var entryData = {
 		"aid": uid,
 		"entryid": eID,
