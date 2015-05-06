@@ -16,31 +16,37 @@ body
 	font-family: Tahoma, Geneva, sans-serif;
 }
 
+/* The following are derivative work from jQuery-UI dialog*/
 label, input 
 { 
 	display:block; 
 }
 
+/* The following are derivative work from jQuery-UI dialog*/
 input.text
 { 
 	margin-bottom:12px; width:95%; padding: .4em; 
 }
 
+/* The following are derivative work from jQuery-UI dialog*/
 fieldset .editor
 { 
 	padding:0; border:0; margin-top:25px; 
 }
 
+/* The following are derivative work from jQuery-UI dialog*/
 h1 
 { 
 	font-size: 1.2em; margin: .6em 0; 
 }
 
+/* The following are derivative work from jQuery-UI dialog*/
 .ui-dialog .ui-state-error 
 { 
 	padding: .3em; 
 }
 
+/* The following are derivative work from jQuery-UI dialog*/
 .validateTips 
 { 
 	border: 1px solid transparent; padding: 0.3em; 

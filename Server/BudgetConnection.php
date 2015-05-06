@@ -12,8 +12,8 @@ class BudgetConnection
 	}
 
 	/*
-	*	Get all budget entries of a given account email
-	*	@param $userid
+	*	Get all budget entries of a given account id 
+	*	@param userid : used to get all entries from a particular user 
 	*/
 	function getAllBudgetEntry($userid) {
 		//query variables
@@ -55,6 +55,9 @@ class BudgetConnection
 		}
 	}
 	
+	/*
+	*	create a new budget entry in DB
+	*/
 	function addBudgetEntry($aid, $name, $desc, $plan_amount, 
 							$actual_amount, $is_paid) {
 		// other input variable for this function 												
@@ -131,6 +134,16 @@ class BudgetConnection
 		return $retPack;
 	}
 
+	/*
+	*	update the saved entry to DB
+	*	@param:	aid : account id for verification
+	*			entryId : particular entry ID as key 
+	*			name : name of the entry 
+	* 			desc : new description 
+	*			plan_amount : the estimated cost
+	* 			actual_amount : the actual cost 
+	*			is_paid : whether this entry is paid in full or not 
+	*/
 	function editBudgetEntry($aid, $entryId, $name, $desc, $plan_amount, 
 							$actual_amount, $is_paid) {
 		// other input variable for this function 												
@@ -220,6 +233,10 @@ class BudgetConnection
 		
 	}
 	
+	/*
+	*	Delete Budget Entry in the Database, given item ID
+	*	@param id 
+	*/
 	function delBudgetEntry($id) {
 		//query variables
 		$db = $this->db;	// set $db in this function as refering to class private $db;

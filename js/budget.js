@@ -36,28 +36,6 @@ function initBudgetTable() {
 	loadBudgetTable();
 }
 
-function showSummary() {
-	$("#lab_last_update")[0].textContent     = gLastModDate;
-	$("#lab_total_estimated")[0].textContent = "$ " + gTotalEst;
-	$("#lab_pending_payment")[0].textContent = "$ " + gTotalPending;
-	$("#lab_actu_payment")[0].textContent    = "$ " + gTotalPaid;
-}
-
-function initSummary() {
-	// set default value
-	gLastModDate = "";
-	gTotalEst = 0;
-	gTotalPending = 0;
-	gTotalPaid = 0;
-}
-
-function updateSummary(date, est, pending, paid) {
-	gLastModDate = (gLastModDate > date) ? gLastModDate : date;	//keep the later (greater) date
-	gTotalEst += est;
-	gTotalPending += pending;
-	gTotalPaid += paid;
-}
-
 /*
 * load budget table from the current server data
 * if out of sync (ever), discard client data 
@@ -72,7 +50,10 @@ function loadBudgetTable() {
 	getBudgetEntries();
 	
 }
-	
+
+/*
+*	Initialize Budget Table Headers 
+*/
 function setBudgetTableHeader() {
 	// add columns to budget table
 	gTableData.addColumn('number', 	'Entry ID', 			'entry_id');
@@ -80,10 +61,13 @@ function setBudgetTableHeader() {
 	gTableData.addColumn('string',	'Detail Description', 	'descrip');
 	gTableData.addColumn('string',	'Last Modified Date', 	'date');
 	gTableData.addColumn('number',	'Estimated Cost($)', 	'plan_amount');
-	gTableData.addColumn('number',	'Actual Cost($)', 	'actu_amount');
+	gTableData.addColumn('number',	'Actual Cost($)', 		'actu_amount');
 	gTableData.addColumn('boolean',	'Paid In Full', 		'is_paid');
 }	
 
+/*
+* 	Draw table with some of the columns for users
+*/
 function drawViewable(){
 	// display (1)name, (2)desc, (3)mod_date, (4)planned amount, (5)actual amount, and (6)paid
 	gTableView.setColumns([1,2,3,4,5,6]); //here you set the columns you want to display
@@ -95,6 +79,10 @@ function drawViewable(){
 	google.visualization.events.addListener(gBudgetTable, 'select', selectionHandler);
 }
 
+/*
+*	Budget Table Selection Handler
+* 	popup editor dialog when an item is selected for edit 
+*/
 function selectionHandler() {
 	var FIRST_SELECTION = 0;// always get the first of all selections for edit
 	var selections;			// an array of selected rows or cells 
@@ -161,9 +149,9 @@ function getBudgetEntries() {
 			if (json_result != []) {
 				$.each(json_result, function(entry_key, entry_detail) {
 					// Attention: need to parseInt(amounts) because json parse amounts to string
-					entry_detail['entry_id'] = parseInt(entry_detail['entry_id']);
-					entry_detail['planned_amount'] = parseInt(entry_detail['planned_amount']);
-					entry_detail['actual_amount'] = parseInt(entry_detail['actual_amount']);
+					entry_detail['entry_id'] = parseFloat(entry_detail['entry_id']);
+					entry_detail['planned_amount'] = parseFloat(entry_detail['planned_amount']);
+					entry_detail['actual_amount'] = parseFloat(entry_detail['actual_amount']);
 					// need to parse bool from string "0" and "1"
 					entry_detail['is_Paid'] = entry_detail['is_Paid'] == "0" ? false : true;
 					
@@ -359,25 +347,6 @@ function modifyEntry() {
 			json_result = jQuery.parseJSON(result);
 			if (json_result['status'] == 1) {
 				alert(json_result['message']);
-				// status 1 means ok, 0 means not changed, and -1 or -2 means error
-				// find the row number
-				//targetRow = gTableData.getFilteredRows([{column: 0, value: eID}])[0];	// should be only 1 row
-				
-				/*
-				gTableData.setRowProperties(targetRow, [
-					[eID, eName, eDesc, 
-					json_result['modified_date'], 
-					{v: ePlanAmount, f: '$' + ePlanAmount}, 
-					{v: eActuAmount, f: '$' + eActuAmount}, 
-					ePaid]
-				]);
-				*/
-				/*gTableData.setRowProperty(targetRow, 'Entry Name', eName);
-				gTableData.setRowProperty(targetRow, 'Detail Description', eDesc);
-				gTableData.setRowProperty(targetRow, 'Last Modified Date', json_result['modified_date']);
-				gTableData.setRowProperty(targetRow, 'Planned Amount($)', {v: ePlanAmount, f: '$' + ePlanAmount});
-				gTableData.setRowProperty(targetRow, 'Actual Amount($)', {v: eActuAmount, f: '$' + eActuAmount});
-				gTableData.setRowProperty(targetRow, 'Paid In Full', ePaid);*/
 			}
 			
 			// redraw table
@@ -388,13 +357,6 @@ function modifyEntry() {
         	console.log("Error: " + errorThrown); 
     	}  
 	});
-}
-
-
-
-
-function calculateTotalExpenditure() {
-
 }
 
 
@@ -449,6 +411,21 @@ $(function() {
 		}
     }
 	
+	// modified and derived from jquery-ui tutorial
+	function checkValidation() {
+		var valid = true;
+		allFields.removeClass( "ui-state-error" );
+		
+		valid = valid && checkLength( name, "Entry Name", 3, 40 );
+		
+		valid = valid && checkRegexp( plan_amount, /^\s*-?[1-9]\d*(\.\d{1,2})?\s*$/, 
+			"Cost must be numbers up to 2 decimals and must begin with a number. eg. 123.45" );
+		valid = valid && checkRegexp( actu_amount, /^\s*-?[1-9]\d*(\.\d{1,2})?\s*$/, 
+			"Cost must be numbers up to 2 decimals and must begin with a number. eg. 123.45" );
+ 
+		return valid;
+	}
+	
 	
 	// popup budget entry editor 
     gBudgetEditorDialog = $( "#budget_editor_dialog_form" ).dialog({
@@ -459,12 +436,17 @@ $(function() {
 		buttons: {
         //"Create an account": addUser,
 			Add: function() {
-				addEntry();
-				gBudgetEditorDialog.dialog( "close" );
+				if (checkValidation()) {
+					addEntry();	
+					gBudgetEditorDialog.dialog( "close" );
+				}
+				
 			},
 			Save: function() {
-				modifyEntry();
-				gBudgetEditorDialog.dialog( "close" );
+				if (checkValidation()) {
+					modifyEntry();
+					gBudgetEditorDialog.dialog( "close" );
+				}
 			},
 			Delete: function() {
 				if (confirm("WARNING: this action cannot be undone!") == true) {
@@ -494,4 +476,36 @@ $(function() {
     });
 
 });
+
+
+/*
+*	Populate the Summary Data to the page 
+*/
+function showSummary() {
+	$("#lab_last_update")[0].textContent     = gLastModDate;
+	$("#lab_total_estimated")[0].textContent = "$ " + gTotalEst;
+	$("#lab_pending_payment")[0].textContent = "$ " + gTotalPending;
+	$("#lab_actu_payment")[0].textContent    = "$ " + gTotalPaid;
+}
+
+/*
+*	Initialize the default value of the summary 
+*/
+function initSummary() {
+	// set default value
+	gLastModDate = "";
+	gTotalEst = 0;
+	gTotalPending = 0;
+	gTotalPaid = 0;
+}
+
+/*
+*	Update the values of the summary in the overview section 
+*/
+function updateSummary(date, est, pending, paid) {
+	gLastModDate = (gLastModDate > date) ? gLastModDate : date;	//keep the later (greater) date
+	gTotalEst += est;
+	gTotalPending += pending;
+	gTotalPaid += paid;
+}
 
